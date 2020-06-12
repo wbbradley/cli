@@ -64,8 +64,19 @@ func aliasSet(cmd *cobra.Command, args []string) error {
 
 	alias := args[0]
 	expansion := processArgs(args[1:])
+	expansionStr := ""
 
-	expansionStr := strings.Join(expansion, " ")
+	for i, v := range expansion {
+		if i == 0 {
+			expansionStr = v
+		} else if strings.HasPrefix(v, "-") {
+			expansionStr += fmt.Sprintf(" %s", v)
+		} else {
+			expansionStr += fmt.Sprintf(" %q", v)
+		}
+	}
+
+	isExternal := strings.HasPrefix(expansionStr, "!")
 
 	out := colorableOut(cmd)
 	fmt.Fprintf(out, "- Adding alias for %s: %s\n", utils.Bold(alias), utils.Bold(expansionStr))
@@ -74,7 +85,7 @@ func aliasSet(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not create alias: %q is already a gh command", alias)
 	}
 
-	if !validCommand(expansion) {
+	if !isExternal && !validCommand(expansion) {
 		return fmt.Errorf("could not create alias: %s does not correspond to a gh command", utils.Bold(expansionStr))
 	}
 

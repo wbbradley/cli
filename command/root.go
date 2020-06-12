@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"os/exec"
 	"regexp"
 	"runtime/debug"
 	"strings"
@@ -409,6 +410,20 @@ func ExpandAlias(args []string) ([]string, error) {
 		}
 
 		newArgs = append(newArgs, extraArgs...)
+
+		if strings.HasPrefix(newArgs[0], "!") {
+			newArgs[0] = newArgs[0][1:]
+			externalCmd := exec.Command(newArgs[0], newArgs[1:]...)
+			externalCmd.Stderr = os.Stderr
+			externalCmd.Stdout = os.Stdout
+			externalCmd.Stdin = os.Stdin
+
+			err := externalCmd.Run()
+			if err != nil {
+				return nil, fmt.Errorf("failed to run external command: %w", err)
+			}
+			return nil, nil
+		}
 
 		return newArgs, nil
 	}
