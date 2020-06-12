@@ -64,7 +64,7 @@ func aliasSet(cmd *cobra.Command, args []string) error {
 
 	alias := args[0]
 	expansion := processArgs(args[1:])
-	expansionStr := unshlex(expansion)
+	expansionStr := utils.Unshlex(expansion)
 
 	isExternal := strings.HasPrefix(expansionStr, "!")
 
@@ -212,20 +212,4 @@ func aliasDelete(cmd *cobra.Command, args []string) error {
 	fmt.Fprintf(out, "%s Deleted alias %s; was %s\n", redCheck, alias, expansion)
 
 	return nil
-}
-
-// unshlex takes a list of arguments for execution and safely joins them into a string
-func unshlex(args []string) string {
-	result := ""
-	for i, arg := range args {
-		if i == 0 {
-			result = arg
-		} else if strings.HasPrefix(arg, "-") {
-			result += fmt.Sprintf(" %s", arg)
-		} else {
-			result += fmt.Sprintf(" %q", arg)
-		}
-	}
-
-	return result
 }

@@ -413,7 +413,9 @@ func ExpandAlias(args []string) ([]string, error) {
 
 		if strings.HasPrefix(newArgs[0], "!") {
 			newArgs[0] = newArgs[0][1:]
-			externalCmd := exec.Command(newArgs[0], newArgs[1:]...)
+			newNewArgs := []string{"-c", utils.Unshlex(newArgs)}
+			externalCmd := exec.Command("sh", newNewArgs...)
+			fmt.Printf("DEBUG %#v\n", externalCmd)
 			externalCmd.Stderr = os.Stderr
 			externalCmd.Stdout = os.Stdout
 			externalCmd.Stdin = os.Stdin

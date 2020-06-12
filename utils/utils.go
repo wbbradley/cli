@@ -87,3 +87,19 @@ var StopSpinner = func(s *spinner.Spinner) {
 func Spinner(w io.Writer) *spinner.Spinner {
 	return spinner.New(spinner.CharSets[11], 400*time.Millisecond, spinner.WithWriter(w))
 }
+
+// unshlex takes a list of arguments for execution and safely joins them into a string
+func Unshlex(args []string) string {
+	result := ""
+	for i, arg := range args {
+		if i == 0 {
+			result = arg
+		} else if strings.HasPrefix(arg, "-") || !strings.Contains(arg, " ") {
+			result += fmt.Sprintf(" %s", arg)
+		} else {
+			result += fmt.Sprintf(" %q", arg)
+		}
+	}
+
+	return result
+}
