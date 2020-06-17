@@ -2,6 +2,7 @@ package command
 
 import (
 	"fmt"
+	"os/exec"
 	"sort"
 	"strings"
 
@@ -73,8 +74,12 @@ func aliasSet(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("could not create alias: %q is already a gh command", alias)
 	}
 
-	if !isExternal(expansion) && !validCommand(expansion) {
-		return fmt.Errorf("could not create alias: %s does not correspond to a either a gh subcommand or a command on your PATH", utils.Bold(expansionStr))
+	if !validCommand(expansion) {
+		_, err = exec.LookPath(expansion[0])
+		stderr := colorableErr(cmd)
+		if err != nil {
+			fmt.Fprintf(stderr, "%s %s does not correspond to a gh subcommand nor a command on your PATH\n", utils.Yellow("!"), utils.Bold(expansionStr))
+		}
 	}
 
 	successMsg := fmt.Sprintf("%s Added alias.", utils.Green("✓"))
