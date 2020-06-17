@@ -411,11 +411,22 @@ func ExpandAlias(args []string) ([]string, error) {
 
 		newArgs = append(newArgs, extraArgs...)
 
-		if strings.HasPrefix(newArgs[0], "!") {
-			newArgs[0] = newArgs[0][1:]
-			newNewArgs := []string{"-c", utils.Unshlex(newArgs)}
-			externalCmd := exec.Command("sh", newNewArgs...)
-			fmt.Printf("DEBUG %#v\n", externalCmd)
+		defaultShell := "sh"
+		if os.Getenv("SHELL") != "" {
+			defaultShell = os.Getenv("SHELL")
+		}
+
+		if isExternal(newArgs) {
+			if validCommand([]string{newArgs[0]}) {
+				// they want to compose or redirect but didn't include leading gh
+				tmp := []string{"gh"}
+				for _, x := range newArgs {
+					tmp = append(tmp, x)
+				}
+				newArgs = tmp
+			}
+			newArgs := []string{"-c", utils.Unshlex(newArgs)}
+			externalCmd := exec.Command(defaultShell, newArgs...)
 			externalCmd.Stderr = os.Stderr
 			externalCmd.Stdout = os.Stdout
 			externalCmd.Stdin = os.Stdin
@@ -431,4 +442,24 @@ func ExpandAlias(args []string) ([]string, error) {
 	}
 
 	return args[1:], nil
+}
+
+func isExternal(cmdArgs []string) bool {
+	_, err := exec.LookPath(cmdArgs[0])
+	if err == nil {
+		return true
+	}
+
+	specialChars := []string{"|", ">", "<"}
+
+	// sloppy join here because we are doing a crude search; can consider using unshlex and being more
+	// careful.
+	cmdStr := strings.Join(cmdArgs, " ")
+	for _, c := range specialChars {
+		if strings.Contains(cmdStr, c) {
+			return true
+		}
+	}
+
+	return false
 }
