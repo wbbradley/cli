@@ -108,6 +108,7 @@ var RootCmd = &cobra.Command{
 	$ gh issue create
 	$ gh repo clone cli/cli
 	$ gh pr checkout 321
+	$ gh user octocat
 	`),
 	Annotations: map[string]string{
 		"help:feedback": `

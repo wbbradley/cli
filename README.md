@@ -22,6 +22,7 @@ And if you spot bugs or have features that you'd really like to see in `gh`, ple
 - `gh pr [status, list, view, checkout, create]`
 - `gh issue [status, list, view, create]`
 - `gh repo [view, create, clone, fork]`
+- `gh user`
 - `gh config [get, set]`
 - `gh help`
 
